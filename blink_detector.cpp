@@ -4,6 +4,7 @@
 #include "opencv2/highgui/highgui.hpp"
 
 #include "BGS.h"
+#include "state_machine.h"
 
 #include <iostream>
 #include <sstream>
@@ -36,6 +37,8 @@ int main(int argc, char * argv[])
   int i = 0;
   BGS bgs;
   Mat difImg, edges; 
+  State_Machine machine;
+  int blink_counter = 0;
 
   if (argc == 2) i = atoi(argv[1]);
 
@@ -108,6 +111,14 @@ int main(int argc, char * argv[])
     int partition_quantity = atoi(argv[1]);
     int partition_size = height/partition_quantity;
     int centroid = get_centroid_partition(edges_vector, partition_quantity, partition_size);
+
+    // detects blink
+    if(machine.Eval(centroid) == BLINK) {
+        cout << "Blink!!!!\n";
+        blink_counter++;
+    }
+    putText(frame, "Blink counter: "+patch::to_string(blink_counter), cvPoint(30,50), FONT_HERSHEY_COMPLEX_SMALL, 2.0, cvScalar(0,255,255), 1, CV_AA);
+
     draw_partitions(edges, edges_vector, partition_quantity, partition_size, centroid);
 
     imshow("frame", frame);
