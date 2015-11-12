@@ -1,0 +1,7 @@
+Execute makefile:
+
+    $make
+
+Run from terminal:
+
+    $./blink_detector
