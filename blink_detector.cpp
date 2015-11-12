@@ -62,6 +62,9 @@ int main(int argc, char * argv[])
     bgs.Subtract(greyImg, difImg);
 
     difImg.convertTo(edges, CV_8U, 255);
+    threshold(edges, edges, 20, 255, 0);
+
+    Canny(edges, edges, 1, 3, 3);
 
     imshow("frame", frame);
     imshow("edges", edges);
