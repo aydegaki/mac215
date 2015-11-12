@@ -4,4 +4,10 @@ Execute makefile:
 
 Run from terminal:
 
-    $./blink_detector
+    $./blink_detector [number_partions]
+
+Where 'number_partions' is the quantitiy of subgroups of lines that the algorithm will consider.
+Ex:
+    $./blink_detector 480
+
+'480' mean that there will be 480 partition.

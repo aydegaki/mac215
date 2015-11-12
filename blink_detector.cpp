@@ -5,12 +5,30 @@
 
 #include "BGS.h"
 
+#include <iostream>
+#include <sstream>
+#include <string>
+
 // background subtraction
 #define TRAINING_FRAMES 100
 #define ALPHA 0.95
 
 using namespace cv;
 using namespace std;
+
+int get_centroid_partition(Mat edges_vector, int partition_quantity, int partition_size);
+void draw_partitions(Mat edges, Mat edges_vector, int partition_quantity, int partition_size, int centroid);
+
+// http://stackoverflow.com/questions/12975341/to-string-is-not-a-member-of-std-says-so-g
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
 
 int main(int argc, char * argv[]) 
 {
@@ -66,6 +84,17 @@ int main(int argc, char * argv[])
 
     Canny(edges, edges, 1, 3, 3);
 
+    // horizontal projection
+    Mat edges_vector;
+    reduce(edges, edges_vector, 1, CV_REDUCE_SUM, CV_32S);
+    cvtColor(edges, edges, CV_GRAY2RGB);
+
+    int height = edges.rows;
+    int partition_quantity = atoi(argv[1]);
+    int partition_size = height/partition_quantity;
+    int centroid = get_centroid_partition(edges_vector, partition_quantity, partition_size);
+    draw_partitions(edges, edges_vector, partition_quantity, partition_size, centroid);
+
     imshow("frame", frame);
     imshow("edges", edges);
     /* imshow("BGM", bgs.bgmImg); */
@@ -76,4 +105,45 @@ int main(int argc, char * argv[])
 
   // the camera will be deinitialized automatically in VideoCapture destructor
   return 0;
+}
+
+int get_centroid_partition(Mat edges_vector, int partition_quantity, int partition_size) {
+    float weighted_sum = 0;
+    float sum_vector = float(sum(edges_vector).val[0]);
+    for(int i = 0; i < partition_quantity; i++) {
+        float sum = 0;
+        for(int j = i*partition_size; j < (i+1)*partition_size; j++){
+            sum += edges_vector.at<int>(j, 0);
+        }
+        weighted_sum += (i+1)*sum;
+    }
+    if(sum_vector == 0) return 0;
+    return int(weighted_sum/sum_vector)-1;
+} 
+
+void draw_partitions(Mat edges, Mat edges_vector, int partition_quantity, int partition_size, int centroid) {
+    float text_size = 20.0/partition_quantity;
+    float mean_vector = mean(edges_vector).val[0];
+    float sum_vector = float(sum(edges_vector).val[0]);
+    for(int i = 0; i < partition_quantity; i++) {
+        float sum = 0;
+        for(int j = i*partition_size; j < (i+1)*partition_size; j++){
+            sum += edges_vector.at<int>(j, 0);
+        }
+        if(sum > mean_vector) {
+            if(sum_vector != 0) sum = (sum/sum_vector)*100.0;
+            else sum = 0;
+            rectangle(edges, Point( 0, 0+i*partition_size), Point( partition_size*3, (1+i)*partition_size), Scalar( 0, 0, 255 ), 1);
+            putText(edges, patch::to_string(sum).substr(0,4)+"%", cvPoint(0,(i+0.75)*partition_size), FONT_HERSHEY_COMPLEX_SMALL, text_size, cvScalar(0, 0 ,250), 1, CV_AA);
+        } else {
+            if(sum_vector != 0) sum = (sum/sum_vector)*100.0;
+            else sum = 0;
+            rectangle(edges, Point( 0, 0+i*partition_size), Point( partition_size*3, (1+i)*partition_size), Scalar( 0, 255, 255 ), 1);
+            putText(edges, patch::to_string(sum).substr(0,4)+"%", cvPoint(0,(i+0.75)*partition_size), FONT_HERSHEY_COMPLEX_SMALL, text_size, cvScalar(200,200,250), 1, CV_AA);
+        }
+        if(i == centroid) {
+            rectangle(edges, Point( 0, 0+centroid*partition_size), Point( partition_size*3, (1+centroid)*partition_size), Scalar( 0, 255, 0), 1);
+            putText(edges, patch::to_string(sum).substr(0,4)+"%", cvPoint(0,(centroid+0.75)*partition_size), FONT_HERSHEY_COMPLEX_SMALL, text_size, cvScalar(0,255,0), 1, CV_AA);
+        }
+    }
 }
