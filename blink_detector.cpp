@@ -84,6 +84,21 @@ int main(int argc, char * argv[])
 
     Canny(edges, edges, 1, 3, 3);
 
+    //removing short contours
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(edges, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    edges.setTo(0); //remove image in edges
+    unsigned int contour_length_threshold = 100;
+    for (vector<vector<Point> >::iterator it = contours.begin(); it!=contours.end(); )
+    {
+        if (it->size()<contour_length_threshold)
+            it=contours.erase(it);
+        else
+            ++it;
+    }
+    drawContours(edges, contours, -1, 255, 2);
+
     // horizontal projection
     Mat edges_vector;
     reduce(edges, edges_vector, 1, CV_REDUCE_SUM, CV_32S);
