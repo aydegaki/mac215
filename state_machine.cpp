@@ -1,6 +1,16 @@
 #include "state_machine.h"
 
 stringstream out;
+
+// displacement threshold to cosider state transitions
+void State_Machine::Set_Displacement(int disp) {
+    displacement = disp;
+}
+
+int State_Machine::Get_Displacement() {
+    return displacement;
+}
+
 int State_Machine::Eval(int centroid) {
     if(current_state == BLINK) current_state = INIT;
     cout << current_state;
@@ -17,7 +27,7 @@ int State_Machine::Eval(int centroid) {
     }
     counter_frames++;
     // Eyelid down
-    if(current_state == INIT && max-min > 65 && max_time-min_time>0) {
+    if(current_state == INIT && max-min > displacement && max_time-min_time>0) {
         cout << "       DOWN ";
         cout << max_time-min_time;
         cout << "\n";
@@ -29,7 +39,7 @@ int State_Machine::Eval(int centroid) {
         init_interval = counter_frames;
     }
     // Eyelid up
-    if(current_state == TRANSITION && max-min > 65 && max_time-min_time<0) {
+    if(current_state == TRANSITION && max-min > displacement && max_time-min_time<0) {
         cout << "       UP ";
         cout << max_time-min_time;
         cout << "\n";

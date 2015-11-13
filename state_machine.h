@@ -19,29 +19,29 @@ class State_Machine
     public:
         State_Machine(void) {
             current_state = INIT;
-            /* last_centroid = 0; */
-            /* counter_threshold = 0; */
             counter_frames = 0;
             max = -1;
             min = 9999;
             min_time = 0;
             max_time = 0;
             init_interval = 0;
+            displacement = 30;
         };
         ~State_Machine(void) {};
 
         int Eval(int centroid);
         int Get_Current_State();
+        void Set_Displacement(int disp);
+        int Get_Displacement();
 
         int current_state;
-        /* int last_centroid; */
-        /* int counter_threshold; */
         int counter_frames;
         int max;
         int min;
         int min_time;
         int max_time;
         int init_interval;
+        int displacement;
 };
 
 
