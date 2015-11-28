@@ -158,9 +158,9 @@ int main(int argc, char * argv[])
             cout << "Blink!!!!\n";
             blink_counter++;
         }
-        putText(frame, "Blink counter: "+patch::to_string(blink_counter), cvPoint(30,50), FONT_HERSHEY_COMPLEX_SMALL, 2.0, cvScalar(0,255,255), 1, CV_AA);
+        putText(frame, "Counter: "+patch::to_string(blink_counter), cvPoint(30,50), FONT_HERSHEY_COMPLEX_SMALL, 2.0, cvScalar(0,255,255), 1, CV_AA);
+        putText(frame, "Frame: "+patch::to_string(i), cvPoint(30,100), FONT_HERSHEY_COMPLEX_SMALL, 2.0, cvScalar(0,255,255), 1, CV_AA);
 
-        draw_debug(edges, edges_vector, partition_quantity, partition_size, centroid, machine);
 
         // show pupil mask in the frame
         cvtColor(edges, edges, CV_GRAY2RGB);
@@ -169,11 +169,13 @@ int main(int argc, char * argv[])
             frame = frame + gray;
         }
 
+        draw_debug(edges, edges_vector, partition_quantity, partition_size, centroid, machine);
+
         imshow("frame", frame);
         imshow("edges", edges);
         /* imshow("BGM", bgs.bgmImg); */
 
-        if(machine.Get_Current_State() == TRANSITION) usleep(1000000);
+        /* if(machine.Get_Current_State() == TRANSITION) usleep(1000000); */
         /* if(waitKey(30) >= 0) break; */
         if(waitKey(30) == 'q') break;
     }
